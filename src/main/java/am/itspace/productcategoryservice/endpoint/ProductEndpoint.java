@@ -1,7 +1,8 @@
 package am.itspace.productcategoryservice.endpoint;
 
 import am.itspace.productcategoryservice.dto.CreateProductDTO;
-import am.itspace.productcategoryservice.model.CategoryRepository;
+import am.itspace.productcategoryservice.dto.ResponseProductDTO;
+import am.itspace.productcategoryservice.mapper.ProductMapper;
 import am.itspace.productcategoryservice.model.Product;
 import am.itspace.productcategoryservice.model.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,37 +15,33 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/products")
 public class ProductEndpoint {
-    private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    @GetMapping("/products")
-    public List<Product> showAllProducts() {
-        return productRepository.findAll();
+    @GetMapping("")
+    public List<ResponseProductDTO> showAllProducts() {
+        return productMapper.map(productRepository.findAll());
     }
 
-    @GetMapping("/products/{id}")
-    public ResponseEntity<Product> showProductById(@PathVariable(name = "id") int id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseProductDTO> showProductById(@PathVariable(name = "id") int id) {
         Optional<Product> byId = productRepository.findById(id);
         if (byId.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(byId.get());
+        return ResponseEntity.ok(productMapper.map(byId.get()));
     }
 
-    @PostMapping("/products")
+    @PostMapping("")
     public ResponseEntity<?> createProduct(@RequestBody CreateProductDTO createProductDto) {
-        Product product = Product.builder()
-                .title(createProductDto.getTitle())
-                .count(createProductDto.getCount())
-                .price(createProductDto.getPrice())
-                .category(createProductDto.getCategory())
-                .build();
+        Product product = productMapper.map(createProductDto);
         productRepository.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/products")
+    @PutMapping("")
     public ResponseEntity<?> changeProduct(@RequestBody Product product) {
         if (product.getId() == 0) {
             return ResponseEntity.badRequest().build();
@@ -53,15 +50,15 @@ public class ProductEndpoint {
         return ResponseEntity.ok(product);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable(name = "id") int id) {
         productRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/products/byCategory/{id}")
-    public ResponseEntity<List<Product>> getProductsByCategoriesId(@PathVariable(name = "id") int id) {
-        List<Product> productByCategory_id = productRepository.findProductByCategory_Id(id);
+    @GetMapping("/byCategory/{id}")
+    public ResponseEntity<List<ResponseProductDTO>> getProductsByCategoriesId(@PathVariable(name = "id") int id) {
+        List<ResponseProductDTO> productByCategory_id = productMapper.map(productRepository.findProductByCategory_Id(id));
         return ResponseEntity.ok(productByCategory_id);
     }
 }

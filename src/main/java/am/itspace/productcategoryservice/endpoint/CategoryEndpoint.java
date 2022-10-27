@@ -1,6 +1,6 @@
 package am.itspace.productcategoryservice.endpoint;
 
-import am.itspace.productcategoryservice.dto.CreateCategoryDTO;
+import am.itspace.productcategoryservice.dto.CategoryDTO;
 import am.itspace.productcategoryservice.mapper.CategoryMapper;
 import am.itspace.productcategoryservice.model.Category;
 import am.itspace.productcategoryservice.model.CategoryRepository;
@@ -14,34 +14,33 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/categories")
 public class CategoryEndpoint {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-    @GetMapping("categories")
-    public List<Category> showAllCategories() {
-        return categoryRepository.findAll();
+    @GetMapping("")
+    public List<CategoryDTO> showAllCategories() {
+        return categoryMapper.map(categoryRepository.findAll());
     }
 
-    @GetMapping("/categories/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> showCategoryById(@PathVariable(name = "id") int id) {
         Optional<Category> byId = categoryRepository.findById(id);
         if (byId.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(byId.get());
+        return ResponseEntity.ok(categoryMapper.map(byId.get()));
     }
 
-    @PostMapping("/categories")
-    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryDTO createCategoryDto) {
-        Category category = Category.builder()
-                .name(createCategoryDto.getName())
-                .build();
+    @PostMapping("")
+    public ResponseEntity<?> createCategory(@RequestBody CategoryDTO categoryDto) {
+        Category category = categoryMapper.map(categoryDto);
         categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryMapper.map(category));
     }
 
-    @PutMapping("/categories")
+    @PutMapping("")
     public ResponseEntity<?> changeCategory(@RequestBody Category category) {
         if (category.getId() == 0) {
             return ResponseEntity.badRequest().build();
@@ -50,7 +49,7 @@ public class CategoryEndpoint {
         return ResponseEntity.ok(category);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCategoryById(@PathVariable(name = "id") int id) {
         categoryRepository.deleteById(id);
         return ResponseEntity.noContent().build();

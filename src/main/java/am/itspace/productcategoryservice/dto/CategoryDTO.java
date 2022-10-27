@@ -3,6 +3,6 @@ package am.itspace.productcategoryservice.dto;
 import lombok.Data;
 
 @Data
-public class CreateCategoryDTO {
+public class CategoryDTO {
     private String name;
 }

@@ -1,25 +1,18 @@
-package am.itspace.productcategoryservice.model;
+package am.itspace.productcategoryservice.dto;
 
+import am.itspace.productcategoryservice.model.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Builder
-@Table(name = "product")
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class ResponseProductDTO {
     private String title;
     private int count;
     private double price;
-    @ManyToOne
     private Category category;
 }
